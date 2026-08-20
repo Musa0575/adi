@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Informatika-SMA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { width: 260px; position: fixed; top: 0; bottom: 0; background: #0f172a; color: white; padding-top: 20px; overflow-y: auto; z-index: 100; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu a { color: #94a3b8; text-decoration: none; padding: 12px 20px; display: block; font-size: 0.9rem; transition: 0.2s; cursor: pointer; }
+        .sidebar-menu a.active, .sidebar-menu a:hover { background: #2563eb; color: white; border-radius: 6px; margin: 0 10px; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        .sidebar-footer { padding: 15px 20px; background: #020617; border-top: 1px solid rgba(255,255,255,0.1); }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h4 class="px-3 text-white fw-bold mb-1"><i class="fa-solid fa-laptop-code me-2"></i>Informatika-SMA</h4>
+        <div class="px-3 mb-4"><span class="badge bg-success">● Mode Sistem: AKTIF</span></div>
+        
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'backend_dashboard' %}"><i class="fa-solid fa-gauge me-2"></i>Dashboard Utama</a></li>
+            <li class="px-3 text-uppercase text-muted my-3" style="font-size: 0.75rem;">ADMINISTRATIVE</li>
+            <li><a href="{% url 'backend_dashboard' %}"><i class="fa-solid fa-newspaper me-2"></i>Berita & Artikel</a></li>
+            <li><a href="{% url 'backend_jadwal' %}"><i class="fa-solid fa-calendar-days me-2"></i>Daftar Kelas & Jadwal</a></li>
+            <li><a href="{% url 'backend_bank_soal' %}" class="active"><i class="fa-solid fa-file-pen me-2"></i>Bank Soal / Kuis</a></li>
+            <li><a href="{% url 'backend_banner' %}"><i class="fa-solid fa-images me-2"></i>Slideshow Banner</a></li>
+            <li><a href="{% url 'materi_list' %}"><i class="fa-solid fa-book-open me-2"></i>Materi Pembelajaran</a></li>
+            <li class="px-3 text-uppercase text-muted my-3" style="font-size: 0.75rem;">PENGATURAN</li>
+            <li><a href="{% url 'frontend_home' %}" target="_blank" style="color: #f59e0b;"><i class="fa-solid fa-arrow-up-right-from-square me-2"></i>Lihat Front-End ↗</a></li>
+        </ul>
+    </div>
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    <i class="fa-solid fa-circle-user fa-2x text-primary"></i>
+                    <div class="text-truncate">
+                        <div class="fw-bold text-white small text-truncate">{{ user.username|default:"Admin" }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">Administrator</div>
+                    </div>
+                </div>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm border-0" title="Keluar">
+                    <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        
+        <!-- Pesan Alert / Feedback Django -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Dashboard Section -->
+        <div id="section-dashboard" class="content-section">
+            <h2>Beranda Admin</h2>
+            <p>Selamat datang di Panel Manajemen Portal Sekolah.</p>
+            <div class="row g-3 my-3">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white p-3">
+                        <h6>Total Materi</h6>
+                        <h3>{{ total_materi }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white p-3">
+                        <h6>Total Jadwal</h6>
+                        <h3>{{ total_jadwal }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white p-3">
+                        <h6>Total Berita</h6>
+                        <h3>{{ total_berita }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white p-3">
+                        <h6>Total Banner</h6>
+                        <h3>{{ total_banner }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Materi Section -->
+        <div id="section-materi" class="content-section active">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold">Manajemen Materi Pembelajaran</h3>
+            </div>
+
+            <form method="POST" action="{% url 'materi_list' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create">
+
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <label class="form-label font-weight-bold">Judul Materi</label>
+            <input type="text" name="judul" class="form-control" placeholder="Masukkan judul materi" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label font-weight-bold">Kelas</label>
+            <select name="kelas" class="form-select" required>
+                <option value="X">Kelas X</option>
+                <option value="XI">Kelas XI</option>
+                <option value="XII">Kelas XII</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label font-weight-bold">KKM</label>
+            <input type="number" name="kkm" class="form-control" value="75">
+        </div>
+        <div class="col-md-8">
+            <label class="form-label font-weight-bold">URL Video (Youtube/Lainnya)</label>
+            <input type="url" name="video_url" class="form-control" placeholder="https://youtube.com/...">
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label font-weight-bold">Deskripsi Ringkas</label>
+        <textarea name="deskripsi" class="form-control" rows="3" placeholder="Tulis deskripsi materi..."></textarea>
+    </div>
+  <div class="row mb-4">
+		<div class="mb-4">
+			<label class="form-label font-weight-bold">File PDF Materi</label>
+			<input type="file" name="file_pdf" class="form-control" accept=".pdf">
+		</div>
+		<div class="mb-3">
+			<label class="form-label text-secondary fw-semibold">Mata Pelajaran:</label>
+			<select name="mapel" class="form-select form-control-custom" required>
+				<option value="Informatika">Informatika</option>
+				<option value="Matematika">Matematika</option>
+				<option value="Fisika">Fisika</option>
+				<option value="Kimia">Kimia</option>
+				<option value="Biologi">Biologi</option>
+				<option value="Bahasa Indonesia">Bahasa Indonesia</option>
+				<option value="Bahasa Inggris">Bahasa Inggris</option>
+				<option value="Sejarah">Sejarah</option>
+				<option value="PKn">PKn</option>
+				<option value="Sosiologi">Sosiologi</option>
+				<option value="Geografi">Geografi</option>
+				<option value="Seni Budaya">Seni Budaya</option>
+				<option value="Leadership">Leadership</option>
+				<option value="PAI">Pendidikan Agama Islam</option>
+				<option value="Ekonomi">Ekonomi</option>
+			</select>
+		</div>
+    <hr class="my-3">
+
+    <!-- BAGIAN BAWAH: UPLOAD ZIP EVALUASI SEBELAH TOMBOL SIMPAN -->
+    <div class="d-flex align-items-center gap-2">
+        <button type="submit" name="submit_tambah_materi" class="btn btn-primary px-4">
+            <i class="fas fa-plus"></i> + Simpan Materi
+        </button>
+
+        <div class="input-group" style="max-width: 380px;">
+            <span class="input-group-text bg-light"><i class="fas fa-file-archive text-warning"></i> Soal (.ZIP)</span>
+            <input type="file" name="file_zip" class="form-control" accept=".zip" title="Upload paket soal HTML (.ZIP)">
+        </div>
+    </div>
+</form>
+
+           <div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Judul Materi</th>
+                <th class="text-center">Kelas</th>
+			    <th class="text-center">Mapel</th>
+                <th class="text-center">KKM</th>
+                <th class="text-center">File PDF</th>
+                <th class="text-center">Kuis Interaktif (HTML)</th> <!-- Header Kolom Baru -->
+                <th class="text-center">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in materi_list %}
+            <tr>
+                <td class="fw-bold">{{ m.judul }}</td>
+                <td class="text-center">
+                    <span class="badge bg-secondary">{{ m.kelas }}</span>
+                </td>
+				 <td class="text-center">{{ m.mapel }}</td>
+                <td class="text-center">{{ m.kkm }}</td>
+                
+                <!-- 1. Tombol File PDF -->
+                <td class="text-center">
+                    {% if m.file_pdf %}
+                        <a href="{{ m.file_pdf.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-file-pdf"></i> Lihat PDF
+                        </a>
+                    {% else %}
+                        <span class="text-muted small">-</span>
+                    {% endif %}
+                </td>
+
+                <!-- 2. Tombol File Index / Kuis Hasil Ekstrak ZIP (Di Sebelah PDF) -->
+                <td class="text-center">
+                    {% if m.file_zip or m.folder_ekstrak %}
+                        <a href="{% url 'buka_soal_materi' m.id %}" target="_blank" class="btn btn-sm btn-success fw-bold">
+                            <i class="fas fa-external-link-alt"></i> Buka Kuis HTML
+                        </a>
+                    {% else %}
+                        <span class="badge bg-light text-muted border">Belum Upload ZIP</span>
+                    {% endif %}
+                </td>
+
+                <!-- 3. Tombol Aksi (Edit / Hapus) -->
+                <td class="text-center">
+                    <a href="{% url 'hapus_materi' m.id %}" class="btn btn-sm btn-danger" onClick="return confirm('Yakin ingin menghapus materi ini?')">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">Belum ada data materi.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+    <!-- Bootstrap JS & Navigation Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showSection(sectionId, element) {
+            // Sembunyikan semua section
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            // Hapus class active dari menu
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            
+            // Tampilkan section yang dipilih
+            const target = document.getElementById('section-' + sectionId);
+            if (target) {
+                target.classList.add('active');
+            }
+            if (element) {
+                element.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

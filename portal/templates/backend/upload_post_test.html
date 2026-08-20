@@ -1,0 +1,44 @@
+<div class="container py-4">
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <h4 class="fw-bold mb-3"><i class="fa-solid fa-file-import me-2 text-primary"></i>Upload Soal Post-Test via Excel</h4>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label fw-semibold">{{ form.nama_post_test.label }}</label>
+                {{ form.nama_post_test }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">{{ form.mapel.label }}</label>
+                {{ form.mapel }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">{{ form.file_excel.label }}</label>
+                {{ form.file_excel }}
+                <small class="text-muted d-block mt-1">
+                    <i class="fa-solid fa-circle-info me-1"></i> File harus berformat `.xlsx` atau `.csv` dengan header: 
+                    <code>pertanyaan</code>, <code>opsi_a</code>, <code>opsi_b</code>, <code>opsi_c</code>, <code>opsi_d</code>, <code>jawaban_benar</code>
+                </small>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                    <i class="fa-solid fa-upload me-1"></i> Import Soal
+                </button>
+                <a href="#" class="btn btn-outline-secondary rounded-pill px-3">Batal</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Berita & Artikel - SMK NEGERI 4</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { width: 260px; position: fixed; top: 0; bottom: 0; background: #0f172a; color: white; padding-top: 20px; overflow-y: auto; }
+        .sidebar a { color: #94a3b8; text-decoration: none; padding: 10px 20px; display: block; font-size: 0.9rem; }
+        .sidebar a.active, .sidebar a:hover { background: #2563eb; color: white; border-radius: 6px; margin: 0 10px; }
+        .main-content { margin-left: 260px; padding: 30px; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <h4 class="px-3 text-white fw-bold"><i class="fa-solid fa-school me-2"></i>SMK NEGERI 4</h4>
+        <div class="px-3 mb-3"><span class="badge bg-success">● Mode Sistem: AKTIF</span></div>
+        
+        <a href="{% url 'backend_dashboard' %}"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a>
+        
+        <div class="px-3 text-uppercase text-muted my-3" style="font-size: 0.75rem;">ADMINISTRATIVE</div>
+        <a href="/admin/portal/jadwalpelajaran/"><i class="fa-solid fa-calendar-days me-2"></i>Daftar Kelas & Jadwal</a>
+        <a href="{% url 'kelola_berita' %}" class="active"><i class="fa-solid fa-newspaper me-2"></i>Berita & Artikel</a>
+        <a href="/admin/portal/kuis/"><i class="fa-solid fa-file-pen me-2"></i>Bank Soal / Kuis</a>
+        <a href="/admin/portal/slidebanner/"><i class="fa-solid fa-images me-2"></i>Slideshow Banner</a>
+        <a href="/admin/portal/materipembelajaran/"><i class="fa-solid fa-book-open me-2"></i>Materi Pembelajaran</a>
+        <a href="/admin/portal/nilaisiswa/"><i class="fa-solid fa-graduation-cap me-2"></i>Input Nilai Siswa</a>
+        <a href="/admin/portal/absensi/"><i class="fa-solid fa-clipboard-user me-2"></i>Absensi Sekolah</a>
+        
+        <div class="px-3 text-uppercase text-muted my-3" style="font-size: 0.75rem;">PENGATURAN</div>
+        <a href="/admin/"><i class="fa-solid fa-sliders me-2"></i>Django Admin Panel</a>
+        <a href="{% url 'frontend_home' %}" style="color: #f59e0b;"><i class="fa-solid fa-arrow-up-right-from-square me-2"></i>Lihat Front-End ↗</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Posting Berita & Artikel</h2>
+            <a href="{% url 'frontend_home' %}" class="btn btn-outline-primary" target="_blank">
+                <i class="fa-solid fa-eye me-1"></i> Lihat di Front-End
+            </a>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Form Input Berita -->
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm p-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Input Artikel Baru</h5>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Judul Artikel / Berita</label>
+                            {{ form.judul }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Kategori</label>
+                            {{ form.kategori }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Isi Konten</label>
+                            {{ form.konten }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Gambar Unggulan (Opsional)</label>
+                            {{ form.gambar }}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Terbitkan Sekarang
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Daftar Artikel Terbit -->
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm p-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-list me-2 text-success"></i>Daftar Artikel Diterbitkan</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Judul</th>
+                                    <th>Kategori</th>
+                                    <th>Tanggal Publish</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in berita_list %}
+                                <tr>
+                                    <td class="fw-bold">{{ item.judul }}</td>
+                                    <td><span class="badge bg-info text-dark">{{ item.kategori }}</span></td>
+                                    <td class="small text-muted">{{ item.created_at|date:"d M Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-3">Belum ada berita yang diterbitkan.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

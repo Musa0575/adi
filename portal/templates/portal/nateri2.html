@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Informatika-SMA</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { width: 260px; position: fixed; top: 0; bottom: 0; background: #0f172a; color: white; padding-top: 20px; overflow-y: auto; z-index: 100; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu a { color: #94a3b8; text-decoration: none; padding: 12px 20px; display: block; font-size: 0.9rem; transition: 0.2s; cursor: pointer; }
+        .sidebar-menu a.active, .sidebar-menu a:hover { background: #2563eb; color: white; border-radius: 6px; margin: 0 10px; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        .card-stat { border-radius: 10px; border: none; color: white; padding: 20px; }
+        .server-box { background: #1e293b; color: white; border-radius: 8px; padding: 20px; }
+        .sidebar-footer { padding: 15px 20px; background: #020617; border-top: 1px solid rgba(255,255,255,0.1); }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .step-badge { width: 28px; height: 28px; border-radius: 50%; background: #2563eb; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 8px; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div>
+            <h4 class="px-3 text-white fw-bold mb-1"><i class="fa-solid fa-laptop-code me-2"></i>Informatika-SMA</h4>
+            <div class="px-3 mb-4"><span class="badge bg-success">? Mode Sistem: AKTIF</span></div>
+            
+            <ul class="sidebar-menu">
+                <li>
+                    <a id="nav-dashboard" onClick="showSection('dashboard', this)" class="active">
+                        <i class="fa-solid fa-gauge me-2"></i>Dashboard Utama
+                    </a>
+                </li>
+                
+                <li class="px-3 text-uppercase text-muted my-3" style="font-size: 0.75rem; letter-spacing: 1px;">ADMINISTRATIVE</li>
+                
+                <li>
+                    <a href="{% url 'backend_dashboard' %}">
+                        <i class="fa-solid fa-newspaper me-2"></i>Berita & Artikel
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'backend_jadwal' %}">
+                        <i class="fa-solid fa-calendar-days me-2"></i>Daftar Kelas & Jadwal
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'backend_bank_soal' %}">
+                        <i class="fa-solid fa-file-pen me-2"></i>Bank Soal / Kuis
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'backend_banner' %}">
+                        <i class="fa-solid fa-images me-2"></i>Slideshow Banner
+                    </a>
+                </li>
+                <li>
+                    <a id="nav-materi" onClick="showSection('materi', this)">
+                        <i class="fa-solid fa-book-open me-2"></i>Materi Pembelajaran
+                    </a>
+                </li>
+                
+                <li class="px-3 text-uppercase text-muted my-3" style="font-size: 0.75rem; letter-spacing: 1px;">PENGATURAN</li>
+                <li>
+                    <a href="{% url 'frontend_home' %}" target="_blank" style="color: #f59e0b;">
+                        <i class="fa-solid fa-arrow-up-right-from-square me-2"></i>Lihat Front-End ?
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    <i class="fa-solid fa-circle-user fa-2x text-primary"></i>
+                    <div class="text-truncate">
+                        <div class="fw-bold text-white small text-truncate">{{ user.username|default:"Admin" }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">Administrator</div>
+                    </div>
+                </div>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm border-0" title="Keluar dari Sistem">
+                    <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+
+        <!-- ================= SECTION 1: DASHBOARD UTAMA ================= -->
+        <div id="section-dashboard" class="content-section active">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Beranda Admin</h2>
+                    <p class="text-muted mb-0">Selamat datang di Panel Manajemen Portal Sekolah</p>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{% url 'frontend_home' %}" target="_blank" class="btn btn-outline-primary fw-semibold">
+                        <i class="fa-solid fa-globe me-1"></i> Buka Tampilan Publik
+                    </a>
+                    <a href="{% url 'logout' %}" class="btn btn-danger fw-semibold">
+                        <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fa-solid fa-circle-check me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-md-4 col-lg">
+                    <a href="{% url 'backend_jadwal' %}" class="text-decoration-none text-white d-block">
+                        <div class="card-stat" style="background-color: #0284c7; cursor: pointer;">
+                            <h1 class="fw-bold m-0">{{ total_jadwal|default:0 }}</h1>
+                            <p class="m-0 mt-1">Jadwal Kelas</p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-md-4 col-lg">
+                    <a href="javascript:void(0)" onClick="showSection('materi', document.getElementById('nav-materi'))" class="text-decoration-none text-white d-block">
+                        <div class="card-stat" style="background-color: #d97706; cursor: pointer;">
+                            <h1 class="fw-bold m-0">{{ total_materi|default:0 }}</h1>
+                            <p class="m-0 mt-1">Materi Pembelajaran</p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-md-4 col-lg">
+                    <a href="#tabel-berita" class="text-decoration-none text-white d-block">
+                        <div class="card-stat" style="background-color: #f43f5e; cursor: pointer;">
+                            <h1 class="fw-bold m-0">{{ total_berita|default:0 }}</h1>
+                            <p class="m-0 mt-1">Berita & Artikel</p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-md-4 col-lg">
+                    <a href="{% url 'backend_banner' %}" class="text-decoration-none text-white d-block">
+                        <div class="card-stat" style="background-color: #10b981; cursor: pointer;">
+                            <h1 class="fw-bold m-0">{{ total_banner|default:0 }}</h1>
+                            <p class="m-0 mt-1">Slide Banner</p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-md-4 col-lg">
+                    <a href="{% url 'backend_bank_soal' %}" class="text-decoration-none text-white d-block">
+                        <div class="card-stat" style="background-color: #a855f7; cursor: pointer;">
+                            <h1 class="fw-bold m-0">{{ total_kuis|default:0 }}</h1>
+                            <p class="m-0 mt-1">Bank Soal / Kuis</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4" id="tabel-berita">
+                <div class="col-md-5">
+                    <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 12px;">
+                        <h5 class="fw-bold mb-4 text-primary">
+                            <i class="fa-regular fa-pen-to-square me-2"></i>Posting Artikel Baru
+                        </h5>
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark">Judul Artikel / Berita</label>
+                                <input type="text" name="judul" class="form-control" placeholder="Masukkan judul berita atau artikel..." required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark">Kategori</label>
+                                <select name="kategori" class="form-select">
+                                    <option value="Berita">Berita</option>
+                                    <option value="Pengumuman">Pengumuman</option>
+                                    <option value="Artikel">Artikel</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark">Isi Konten</label>
+                                <textarea name="konten" class="form-control" rows="4" placeholder="Tulis isi konten berita/artikel di sini..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark">Gambar Unggulan (Opsional)</label>
+                                <input type="file" name="gambar" class="form-control">
+                            </div>
+                            <button type="submit" name="submit_berita" class="btn btn-primary w-100 py-2 fw-bold mt-2">
+                                <i class="fa-solid fa-paper-plane me-1"></i> Terbitkan Sekarang
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 12px;">
+                        <h5 class="fw-bold mb-4 text-success">
+                            <i class="fa-solid fa-book-bookmark me-2"></i>Daftar Berita & Artikel Terbit
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Judul</th>
+                                        <th>Kategori</th>
+                                        <th>Tanggal Publish</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in berita_list %}
+                                    <tr>
+                                        <td class="fw-bold text-dark">{{ item.judul }}</td>
+                                        <td><span class="badge bg-info text-dark px-3 py-1" style="border-radius: 20px;">{{ item.kategori }}</span></td>
+                                        <td class="small text-muted">{{ item.created_at|date:"d M Y H:i" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">Belum ada berita.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="server-box shadow-sm">
+                        <h6 class="fw-bold mb-3"><i class="fa-solid fa-server text-warning me-2"></i>Status Server & Database</h6>
+                        <ul class="list-unstyled mb-0 text-white-50 small">
+                            <li class="d-flex justify-content-between mb-2">
+                                <span>Database MySQL:</span>
+                                <span class="badge bg-success">Terhubung</span>
+                            </li>
+                            <li class="d-flex justify-content-between mb-2">
+                                <span>Framework:</span>
+                                <span class="badge bg-primary">Django 6.x</span>
+                            </li>
+                            <li class="d-flex justify-content-between">
+                                <span>Sistem Operasi:</span>
+                                <span class="text-white">Server Linux / Cloud</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
+                        <h6 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Aktivitas Sistem Terakhir</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Pengguna</th>
+                                        <th>Tindakan</th>
+                                        <th>Waktu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="fw-semibold">{{ user.username|default:"Admin" }}</span></td>
+                                        <td>Mengunjungi Dashboard Utama</td>
+                                        <td class="text-muted">Baru Saja</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 2: MATERI PEMBELAJARAN ================= -->
+        <div id="section-materi" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Materi Pembelajaran Interaktif</h2>
+                    <p class="text-muted mb-0">Kelola paket pembelajaran berbasis Video, Modul PDF, serta Evaluasi/Post-Test</p>
+                </div>
+                <button type="button" class="btn btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalTambahMateri">
+                    <i class="fa-solid fa-plus me-1"></i> Tambah Paket Materi Baru
+                </button>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4 bg-white" style="border-radius: 12px;">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-route me-2 text-primary"></i>Alur Pembelajaran Siswa (Sistematis)</h6>
+                    <div class="row text-center g-3">
+                        <div class="col-md-3">
+                            <div class="p-3 rounded bg-light border">
+                                <div class="badge bg-primary rounded-circle mb-2" style="width: 30px; height: 30px; line-height: 22px;">1</div>
+                                <h6 class="fw-bold mb-1"><i class="fa-solid fa-video me-1 text-danger"></i> Menyimak Video</h6>
+                                <small class="text-muted">Siswa mempelajari konsep melalui materi video.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 rounded bg-light border">
+                                <div class="badge bg-primary rounded-circle mb-2" style="width: 30px; height: 30px; line-height: 22px;">2</div>
+                                <h6 class="fw-bold mb-1"><i class="fa-solid fa-file-pdf me-1 text-danger"></i> Mempelajari PDF</h6>
+                                <small class="text-muted">Siswa mengunduh dan membaca modul PDF pendukung.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 rounded bg-light border">
+                                <div class="badge bg-primary rounded-circle mb-2" style="width: 30px; height: 30px; line-height: 22px;">3</div>
+                                <h6 class="fw-bold mb-1"><i class="fa-solid fa-pen-ruler me-1 text-warning"></i> Kerjakan Post-Test</h6>
+                                <small class="text-muted">Menguji pemahaman dengan kuis / evaluasi interaktif.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 rounded bg-light border">
+                                <div class="badge bg-success rounded-circle mb-2" style="width: 30px; height: 30px; line-height: 22px;">4</div>
+                                <h6 class="fw-bold mb-1"><i class="fa-solid fa-square-check me-1 text-success"></i> Nilai & Hasil</h6>
+                                <small class="text-muted">Hasil evaluasi otomatis tercatat di sistem.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Modul / Materi Pembelajaran -->
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
+                <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-folder-open me-2"></i>Daftar Materi Pembelajaran</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Judul Materi</th>
+                                <th>Kelas</th>
+                                <th>Video Pembelajaran</th>
+                                <th>File Modul (PDF)</th>
+                                <th>Post-Test</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Contoh Data Static Dummy -->
+                            <tr>
+                               
+                            <!-- Data Dynamic Django -->
+                            {% for materi in materi_list %}
+                            <tr>
+                                <td>{{ forloop.counter|add:1 }}</td>
+                                <td class="fw-bold">{{ materi.judul }}</td>
+                                <td><span class="badge bg-secondary">{{ materi.kelas }}</span></td>
+                                <td>
+                                    {% if materi.video_url %}
+                                        <a href="{{ materi.video_url }}" target="_blank" class="text-danger fw-semibold"><i class="fa-brands fa-youtube me-1"></i>Link Video</a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if materi.file_pdf %}
+                                        <a href="{{ materi.file_pdf.url }}" target="_blank" class="badge bg-danger text-decoration-none"><i class="fa-solid fa-file-pdf me-1"></i>Download PDF</a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if materi.post_test %}
+                                        <span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i>Tersedia</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Belum Ada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+								     <!-- 2. TOMBOL BARU: Upload Soal -->
+    <button type="button" 
+            class="btn btn-sm me-1 text-white" 
+            style="background-color: #8b5cf6;"
+            title="Upload Soal Kuis / Evaluasi"
+            data-bs-toggle="modal" 
+            data-bs-target="#modalUploadSoal"
+            data-id="{{ materi.id }}"
+            data-judul="{{ materi.judul|escapejs }}">
+        <i class="fa-solid fa-file-circle-plus"></i> Upload Soal
+    </button>
+                                    <!-- Tombol Preview -->
+                                    <button type="button" 
+                                            class="btn btn-sm btn-info text-white me-1" 
+                                            title="Pratinjau Pembelajaran"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalPreviewMateri"
+                                            data-judul="{{ materi.judul|escapejs }}"
+                                            data-kelas="{{ materi.kelas }}"
+                                            data-kkm="{{ materi.kkm|default:'75' }}"
+                                            data-video="{{ materi.video_url }}"
+                                            data-deskripsi="{{ materi.deskripsi|escapejs }}">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    
+                                    <!-- Tombol Edit -->
+                                    <button type="button" 
+                                            class="btn btn-sm btn-warning me-1" 
+                                            title="Edit Materi"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalEditMateri"
+                                            data-id="{{ materi.id }}"
+                                            data-judul="{{ materi.judul|escapejs }}"
+                                            data-kelas="{{ materi.kelas }}"
+                                            data-deskripsi="{{ materi.deskripsi|escapejs }}"
+                                            data-video="{{ materi.video_url }}"
+                                            data-posttest="{{ materi.post_test.id|default:'' }}"
+                                            data-kkm="{{ materi.kkm|default:'75' }}">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+
+                                    <!-- Tombol Hapus -->
+                                    <button type="button" class="btn btn-sm btn-danger" title="Hapus Materi" onClick="hapusMateri('{{ materi.id }}', '{{ materi.judul|escapejs }}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= MODAL: TAMBAH MATERI BARU ================= -->
+    <div class="modal fade" id="modalTambahMateri" tabindex="-1" aria-labelledby="modalTambahMateriLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 12px;">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-header-title fw-bold m-0" id="modalTambahMateriLabel">
+                        <i class="fa-solid fa-cloud-arrow-up me-2"></i>Tambah Paket Materi Pembelajaran Baru
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'materi_list' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body p-4">
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3"><span class="step-badge">1</span> Informasi Umum Materi</h6>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">Judul Materi / Bab Pembelajaran</label>
+                                    <input type="text" name="judul" class="form-control" placeholder="Contoh: Pengenalan Algoritma Dasar" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Kelas / Tingkat</label>
+                                    <select name="kelas" class="form-select" required>
+                                        <option value="">-- Pilih Kelas --</option>
+                                        <option value="X">Kelas X</option>
+                                        <option value="XI">Kelas XI</option>
+                                        <option value="XII">Kelas XII</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Deskripsi Singkat / Tujuan Pembelajaran</label>
+                                    <textarea name="deskripsi" class="form-control" rows="2" placeholder="Jelaskan ringkasan materi yang akan dipelajari siswa..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3"><span class="step-badge">2</span> Bahan Ajar (Video & Modul PDF)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold"><i class="fa-brands fa-youtube text-danger me-1"></i> Link Video Pembelajaran</label>
+                                    <input type="url" name="video_url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold"><i class="fa-solid fa-file-pdf text-danger me-1"></i> File Modul Pendukung (PDF)</label>
+                                    <input type="file" name="file_pdf" class="form-control" accept=".pdf" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div>
+                            <h6 class="fw-bold text-primary mb-3"><span class="step-badge">3</span> Pengaturan Evaluasi (Post-Test)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">Pilih Paket Bank Soal / Post-Test</label>
+                                    <select name="post_test_id" class="form-select">
+                                        <option value="">-- Hubungkan dengan Bank Soal --</option>
+                                        <option value="1">Kuis 01: Algoritma & Logika (5 Soal)</option>
+                                        <option value="2">Kuis 02: Dasar-dasar Python (10 Soal)</option>
+                                        {% for kuis in kuis_list %}
+                                            <option value="{{ kuis.id }}">{{ kuis.judul }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">KKM Kelulusan</label>
+                                    <input type="number" name="kkm" class="form-control" value="75" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary fw-bold"><i class="fa-solid fa-save me-1"></i> Simpan Paket Materi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: EDIT MATERI ================= -->
+    <div class="modal fade" id="modalEditMateri" tabindex="-1" aria-labelledby="modalEditMateriLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 12px;">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-header-title fw-bold m-0" id="modalEditMateriLabel">
+                        <i class="fa-solid fa-pen-to-square me-2"></i>Edit Paket Materi Pembelajaran
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formEditMateri" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="materi_id" id="edit-id">
+                    <div class="modal-body p-4">
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark mb-3"><span class="step-badge bg-warning text-dark">1</span> Informasi Umum Materi</h6>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">Judul Materi / Bab Pembelajaran</label>
+                                    <input type="text" name="judul" id="edit-judul" class="form-control" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Kelas / Tingkat</label>
+                                    <select name="kelas" id="edit-kelas" class="form-select" required>
+                                        <option value="X">Kelas X</option>
+                                        <option value="XI">Kelas XI</option>
+                                        <option value="XII">Kelas XII</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Deskripsi Singkat / Tujuan Pembelajaran</label>
+                                    <textarea name="deskripsi" id="edit-deskripsi" class="form-control" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark mb-3"><span class="step-badge bg-warning text-dark">2</span> Bahan Ajar (Video & Modul PDF)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold"><i class="fa-brands fa-youtube text-danger me-1"></i> Link Video Pembelajaran</label>
+                                    <input type="url" name="video_url" id="edit-video" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold"><i class="fa-solid fa-file-pdf text-danger me-1"></i> Ganti Modul PDF (Opsional)</label>
+                                    <input type="file" name="file_pdf" class="form-control" accept=".pdf">
+                                    <small class="text-muted">* Biarkan kosong jika tidak ingin mengganti file PDF.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div>
+                            <h6 class="fw-bold text-dark mb-3"><span class="step-badge bg-warning text-dark">3</span> Pengaturan Evaluasi (Post-Test)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">Pilih Paket Bank Soal / Post-Test</label>
+                                    <select name="post_test_id" id="edit-posttest" class="form-select">
+                                        <option value="">-- Hubungkan dengan Bank Soal --</option>
+                                        <option value="1">Kuis 01: Algoritma & Logika (5 Soal)</option>
+                                        <option value="2">Kuis 02: Dasar-dasar Python (10 Soal)</option>
+                                        {% for kuis in kuis_list %}
+                                            <option value="{{ kuis.id }}">{{ kuis.judul }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">KKM Kelulusan</label>
+                                    <input type="number" name="kkm" id="edit-kkm" class="form-control" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning fw-bold"><i class="fa-solid fa-rotate me-1"></i> Perbarui Materi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: PRATINJAU / PREVIEW MATERI ================= -->
+    <div class="modal fade" id="modalPreviewMateri" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 12px;">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-header-title fw-bold m-0">
+                        <i class="fa-solid fa-eye me-2"></i>Pratinjau Pembelajaran Siswa
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-bold mb-0" id="prev-judul">Judul Materi</h4>
+                        <span class="badge bg-secondary fs-6" id="prev-kelas">Kelas</span>
+                    </div>
+                    <p class="text-muted mb-4" id="prev-deskripsi">Deskripsi singkat materi...</p>
+
+                    <!-- Embedded Video Wrapper -->
+                    <div class="ratio ratio-16x9 mb-3 rounded shadow-sm overflow-hidden bg-dark">
+                        <iframe id="prev-iframe" src="" title="YouTube video player" allowfullscreen></iframe>
+                    </div>
+                    
+                    <div class="p-3 bg-light rounded d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="fa-solid fa-award text-warning me-2"></i>Standar KKM: <span id="prev-kkm" class="text-primary">75</span></span>
+                        <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-check-circle me-1"></i>Sistem Evaluasi Siap</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- ================= MODAL: UPLOAD SOAL POST-TEST ================= -->
+<div class="modal fade" id="modalUploadSoal" tabindex="-1" aria-labelledby="modalUploadSoalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 12px;">
+            <div class="modal-header text-white" style="background-color: #8b5cf6;">
+                <h5 class="modal-header-title fw-bold m-0" id="modalUploadSoalLabel">
+                    <i class="fa-solid fa-file-circle-plus me-2"></i>Upload Soal Post-Test Materi
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form action="{% url 'upload_post_test_soal' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Hidden Input: Diisi via JavaScript saat tombol modal diklik -->
+                <input type="hidden" name="materi_id" id="upload-soal-materi-id" value="">
+                
+                <div class="modal-body p-4">
+                    <div class="alert alert-primary d-flex align-items-center mb-4" role="alert">
+                        <i class="fa-solid fa-circle-info fa-lg me-3"></i>
+                        <div>
+                            Target Post-Test Materi: <strong id="upload-soal-judul-materi">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Metode Input Soal Post-Test</label>
+                        <select name="metode_upload" id="metodeUpload" class="form-select" onChange="toggleUploadMethod()">
+                            <option value="file">Upload File CSV (Format Soal A-E)</option>
+                            <option value="manual">Input Soal Manual (A-E)</option>
+                        </select>
+                    </div>
+
+                    <!-- Mode 1: Upload File CSV -->
+                    <div id="sectionFileSoal" class="mb-3">
+                        <label class="form-label fw-semibold"><i class="fa-solid fa-file-csv text-success me-1"></i> Pilih File CSV Soal Post-Test</label>
+                        <input type="file" name="file_soal" id="inputFileSoal" class="form-control" accept=".csv" required>
+                        <small class="text-muted d-block mt-2">
+                            <i class="fa-solid fa-circle-notch me-1"></i>
+                            Gunakan format CSV dengan header: <code>pertanyaan,opsi_a,opsi_b,opsi_c,opsi_d,opsi_e,kunci_jawaban</code>
+                        </small>
+                    </div>
+
+                    <!-- Mode 2: Form Input Manual (Opsi A sampai E) -->
+                    <div id="sectionManualSoal" class="d-none">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Pertanyaan Post-Test</label>
+                            <textarea name="pertanyaan" class="form-control" rows="3" placeholder="Tuliskan pertanyaan soal post-test..."></textarea>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Pilihan A</label>
+                                <input type="text" name="opsi_a" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Pilihan B</label>
+                                <input type="text" name="opsi_b" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Pilihan C</label>
+                                <input type="text" name="opsi_c" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Pilihan D</label>
+                                <input type="text" name="opsi_d" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label small fw-semibold">Pilihan E</label>
+                                <input type="text" name="opsi_e" class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Kunci Jawaban Benar</label>
+                            <select name="kunci_jawaban" class="form-select form-select-sm">
+                                <option value="A">Pilihan A</option>
+                                <option value="B">Pilihan B</option>
+                                <option value="C">Pilihan C</option>
+                                <option value="D">Pilihan D</option>
+                                <option value="E">Pilihan E</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #8b5cf6;">
+                        <i class="fa-solid fa-upload me-1"></i> Simpan ke Post-Test
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>    <!-- Bootstrap 5 JavaScript Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 1. Fungsi Navigasi Tab Sidebar
+        function showSection(sectionId, element) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            const targetSection = document.getElementById('section-' + sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            document.querySelectorAll('.sidebar-menu a').forEach(link => link.classList.remove('active'));
+            if (element) {
+                element.classList.add('active');
+            }
+        }
+
+        // 2. Format Link Youtube Embed
+        function getEmbedYoutubeUrl(url) {
+            if (!url) return '';
+            const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+            return (match && match[2].length === 11) ? "https://www.youtube.com/embed/" + match[2] : url;
+        }
+
+        // 3. Inisialisasi Pengisian Data Modal Saat Tombol Diklik
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // Populate Modal Edit
+            const modalEditEl = document.getElementById('modalEditMateri');
+            if (modalEditEl) {
+                modalEditEl.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (!button) return;
+
+                    document.getElementById('edit-id').value = button.getAttribute('data-id') || '';
+                    document.getElementById('edit-judul').value = button.getAttribute('data-judul') || '';
+                    document.getElementById('edit-kelas').value = button.getAttribute('data-kelas') || 'X';
+                    document.getElementById('edit-deskripsi').value = button.getAttribute('data-deskripsi') || '';
+                    document.getElementById('edit-video').value = button.getAttribute('data-video') || '';
+                    
+                    const postTestEl = document.getElementById('edit-posttest');
+                    if (postTestEl) postTestEl.value = button.getAttribute('data-posttest') || '';
+
+                    const kkmEl = document.getElementById('edit-kkm');
+                    if (kkmEl) kkmEl.value = button.getAttribute('data-kkm') || '75';
+                });
+            }
+
+            // Populate Modal Preview
+            const modalPreviewEl = document.getElementById('modalPreviewMateri');
+            if (modalPreviewEl) {
+                modalPreviewEl.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (!button) return;
+
+                    document.getElementById('prev-judul').innerText = button.getAttribute('data-judul') || 'Detail Materi';
+                    document.getElementById('prev-kelas').innerText = "Kelas " + (button.getAttribute('data-kelas') || '-');
+                    document.getElementById('prev-deskripsi').innerText = button.getAttribute('data-deskripsi') || 'Tidak ada deskripsi.';
+                    
+                    const kkmPrevEl = document.getElementById('prev-kkm');
+                    if (kkmPrevEl) kkmPrevEl.innerText = button.getAttribute('data-kkm') || '75';
+
+                    const embedUrl = getEmbedYoutubeUrl(button.getAttribute('data-video'));
+                    document.getElementById('prev-iframe').src = embedUrl;
+                });
+
+                // Hentikan video saat modal preview ditutup
+                modalPreviewEl.addEventListener('hidden.bs.modal', function () {
+                    document.getElementById('prev-iframe').src = '';
+                });
+            }
+        });
+
+        // Handler Hapus Materi
+function hapusMateri(id, judul) {
+    if (confirm("Apakah Anda yakin ingin menghapus materi: '" + judul + "'?")) {
+        // Arahkan ke URL yang sesuai dengan routing Django: dashboard/materi/hapus/ID/
+        window.location.href = "/dashboard/materi/hapus/" + id + "/";
+    }
+}
+    </script>
+</body>
+</html>
