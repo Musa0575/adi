@@ -1,0 +1,7 @@
+[package]
+name = "sekolah-app"
+version = "0.1.0"
+description = "Aplikasi Portal Sekolah"
+
+[app]
+exec = "python -m gunicorn nama_folder_project.wsgi:application --bind 0.0.0.0:$PORT"
